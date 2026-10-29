@@ -1,0 +1,132 @@
+We’ll use ASP.NET Core 10 + Controllers + DTOs + Services + Entity Framework Core + PostgreSQL.
+
+This is a good structure for learning how to build maintainable APIs that can serve web, mobile and other clients. We’ll keep the architecture practical: controllers handle HTTP, services handle business rules, and EF Core handles persistence.
+Step 1 — Create the project structure
+We’ll use your existing LibraryApi project. Keep it for now and remove the template weather endpoint once you’ve confirmed the new setup works.
+
+Our target structure is:
+LibraryApi/
+
+Controllers/
+
+BooksController.cs — HTTP endpoints and status codes
+
+
+Dtos/
+
+CreateBookDto.cs, UpdateBookDto.cs, BookDto.cs
+
+
+Data/
+
+AppDbContext.cs — EF Core database session and entity configuration
+
+
+Models/
+
+Book.cs — database entity
+
+
+Services/
+
+IBookService.cs, BookService.cs — business operations
+
+
+Program.cs
+
+Dependency injection, middleware and application startup
+
+
+appsettings.json
+
+Database configuration (local development only; secrets handled carefully)
+
+
+
+
+We’ll add these folders as we need them rather than creating empty files all at once.
+Step 2 — Install Entity Framework Core and the PostgreSQL provider
+Entity Framework Core (EF Core) is an object-relational mapper (ORM). It lets you query and update PostgreSQL using C# objects and LINQ instead of writing SQL for every operation.
+
+For example, eventually you’ll write:
+var books = await dbContext.Books.ToListAsync();
+
+
+EF Core translates that query into SQL and retrieves the matching records from PostgreSQL. The Npgsql provider supplies the PostgreSQL-specific integration. 
+Npgsql Documentation+1
+
+2.1 Install the packages
+Run these commands from inside your existing LibraryApi project directory:
+dotnet add package Npgsql.EntityFrameworkCore.PostgreSQL --version 10.0.3
+dotnet add package Microsoft.EntityFrameworkCore.Design --version 10.0.3
+
+
+What each package does:
+Package	Responsibility
+Npgsql.EntityFrameworkCore.PostgreSQL	Connects EF Core to PostgreSQL
+Microsoft.EntityFrameworkCore.Design	Provides design-time support for migrations and database tooling
+
+We’re matching the EF Core tooling and provider to the .NET 10 generation. EF tooling should use the same major version as the runtime packages. 
+Npgsql.EntityFrameworkCore.PostgreSQL 10.0.3+1
+
+2.2 Install the EF Core command-line tool
+Run:
+dotnet tool install --global dotnet-ef --version 10.0.3
+
+
+If you already have dotnet-ef installed, use this instead:
+dotnet tool update --global dotnet-ef --version 10.0.3
+
+
+Verify the installation:
+dotnet ef --version
+
+
+We’ll use commands such as dotnet ef migrations add InitialCreate and dotnet ef database update later. Migrations allow us to version database schema changes alongside the application code. 
+GitHub
+
+Step 3 — Create the PostgreSQL database
+We need a database before EF Core can create tables inside it.
+
+Open your terminal and connect to PostgreSQL:
+psql -U postgres
+
+
+If your PostgreSQL installation uses a different database username, substitute that username.
+
+At the PostgreSQL prompt, execute:
+CREATE DATABASE library_api;
+
+
+Then exit:
+\q
+
+
+The command creates an empty database named library_api. It does not create the books table yet; EF Core will handle that through migrations.
+
+If the connection fails, check that the PostgreSQL service is running and that you are using the correct username, password and port.
+Step 4 — Configure the database connection securely
+ASP.NET Core can load configuration from multiple sources. For local development, we’ll use User Secrets to avoid putting your database password in a committed configuration file.
+
+First, initialize User Secrets from your project directory:
+dotnet user-secrets init
+
+
+Then set the connection string:
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Host=localhost;Port=5432;Database=library_api;Username=postgres;Password=YOUR_POSTGRES_PASSWORD"
+
+
+Replace YOUR_POSTGRES_PASSWORD with the actual password for your PostgreSQL user. If you use a different username or port, change those values too. Do not commit this connection string or share the real password.
+
+ASP.NET Core will make the setting available through:
+builder.Configuration.GetConnectionString("DefaultConnection")
+
+
+We’ll use that when registering the database context.
+Your checkpoint
+Complete Steps 2–4, then run:
+dotnet ef --version
+dotnet build
+
+
+Tell me whether both commands succeed. If you encounter an error, paste the full error message, but remove any passwords or other secrets..
