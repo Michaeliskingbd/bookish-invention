@@ -1,4 +1,6 @@
 using LibraryApi.Data;
+using LibraryApi.Services;
+using LibraryApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +11,8 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IBookService, BookService>();
 
 var app = builder.Build();
 
