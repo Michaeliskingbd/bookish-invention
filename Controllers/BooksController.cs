@@ -18,9 +18,7 @@ public sealed class BooksController : ControllerBase
     }
 
     [HttpGet]
-    [ProducesResponseType(
-        typeof(IReadOnlyList<BookResponseDto>),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IReadOnlyList<BookResponseDto>),StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<BookResponseDto>>> GetAll(
         CancellationToken cancellationToken)
     {
@@ -32,9 +30,7 @@ public sealed class BooksController : ControllerBase
     }
 
     [HttpGet("{id:int}")]
-    [ProducesResponseType(
-        typeof(BookResponseDto),
-        StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(BookResponseDto),StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BookResponseDto>> GetById(
         int id,
@@ -71,4 +67,32 @@ public async Task<ActionResult<BookResponseDto>> Create(
         book
     );
 }
+
+[HttpPut("{id:int}")]
+[ProducesResponseType(typeof(BookResponseDto), StatusCodes.Status201Created)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+public async Task<ActionResult<BookResponseDto>> Update(
+    int id,
+    UpdateBookDTO request,
+    CancellationToken cancellationToken)
+    {
+         var book = await _bookService.UpdateAsync(
+            id,
+            request,
+            cancellationToken
+        );
+
+        if (book is null)
+    {
+        return NotFound();
+    }
+
+    return Ok(book);
+    }
+    
+
+
+
 }

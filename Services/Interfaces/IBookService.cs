@@ -19,8 +19,8 @@ public interface IBookService
         CancellationToken cancellationToken
     );
 
-    Task<BookResponseDto>  UpdateAsync(
-        int Id,
+    Task<BookResponseDto?>  UpdateAsync(
+        int id,
         UpdateBookDTO request,
         CancellationToken cancellationToken
     );
