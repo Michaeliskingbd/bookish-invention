@@ -13,4 +13,9 @@ public interface IBookService
         int id,
         CancellationToken cancellationToken
     );
+
+    Task<BookResponseDto>  CreateAsync(
+        CreateBookDTO request,
+        CancellationToken cancellationToken
+    );
 }
