@@ -51,5 +51,5 @@ public sealed class BooksController : ControllerBase
         }
 
         return Ok(book);
-     }
+    }
 }

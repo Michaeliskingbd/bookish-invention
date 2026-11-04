@@ -12,7 +12,7 @@ public sealed class BookService: IBookService
 {
     private readonly AppDbContext _dbContext;
 
-    private BookService(AppDbContext dbContext)
+    public BookService(AppDbContext dbContext)
     {
             _dbContext = dbContext;
     }
