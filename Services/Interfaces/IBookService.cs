@@ -18,4 +18,10 @@ public interface IBookService
         CreateBookDTO request,
         CancellationToken cancellationToken
     );
+
+    Task<BookResponseDto>  UpdateAsync(
+        int Id,
+        UpdateBookDTO request,
+        CancellationToken cancellationToken
+    );
 }

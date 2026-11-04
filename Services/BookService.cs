@@ -70,4 +70,35 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         
     }
 
+   public async Task<BookResponseDto?> UpdateAsync(
+    int id,
+    UpdateBookDTO request,
+    CancellationToken cancellationToken)
+{
+    var book = await _dbContext.Books
+        .SingleOrDefaultAsync(
+            book => book.Id == id,
+            cancellationToken
+        );
+
+    if (book is null)
+    {
+        return null;
+    }
+
+    book.Title = request.Title;
+    book.Genre = request.Genre;
+    book.Price = request.Price;
+    book.ReleaseDate = request.ReleaseDate;
+
+    await _dbContext.SaveChangesAsync(cancellationToken);
+
+    return new BookResponseDto(
+        book.Id,
+        book.Title,
+        book.Genre,
+        book.Price,
+        book.ReleaseDate
+    );
+}
 }
