@@ -52,4 +52,23 @@ public sealed class BooksController : ControllerBase
 
         return Ok(book);
     }
+
+[HttpPost]
+[ProducesResponseType(typeof(BookResponseDto), StatusCodes.Status201Created)]
+[ProducesResponseType(StatusCodes.Status400BadRequest)]
+public async Task<ActionResult<BookResponseDto>> Create(
+    CreateBookDTO request,
+    CancellationToken cancellationToken)
+{
+    var book = await _bookService.CreateAsync(
+        request,
+        cancellationToken
+    );
+
+    return CreatedAtAction(
+        nameof(GetById),
+        new { id = book.Id },
+        book
+    );
+}
 }
