@@ -24,4 +24,9 @@ public interface IBookService
         UpdateBookDTO request,
         CancellationToken cancellationToken
     );
+
+    Task<bool>  DeleteAsync(
+        int id,
+        CancellationToken cancellationToken
+    );
 }
