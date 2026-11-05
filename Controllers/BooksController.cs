@@ -113,4 +113,11 @@ public async Task<IActionResult> Delete(
     return NoContent();
 }
 
+
+[HttpGet("test-error")]
+public IActionResult TestError()
+{
+    throw new InvalidOperationException("This is a test exception.");
+}
+
 }

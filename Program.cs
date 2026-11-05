@@ -17,6 +17,8 @@ builder.Services.AddScoped<IBookService, BookService>();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
