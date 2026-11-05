@@ -93,6 +93,24 @@ public async Task<ActionResult<BookResponseDto>> Update(
     }
     
 
+[HttpDelete("{id:int}")]
+[ProducesResponseType(StatusCodes.Status204NoContent)]
+[ProducesResponseType(StatusCodes.Status404NotFound)]
+public async Task<IActionResult> Delete(
+    int id,
+    CancellationToken cancellationToken)
+{
+    var deleted = await _bookService.DeleteAsync(
+        id,
+        cancellationToken
+    );
 
+    if (!deleted)
+    {
+        return NotFound();
+    }
+
+    return NoContent();
+}
 
 }

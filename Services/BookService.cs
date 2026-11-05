@@ -4,6 +4,7 @@ using LibraryApi.DTOs.Books;
 using LibraryApi.Models;
 using LibraryApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 
 namespace LibraryApi.Services;
@@ -101,4 +102,26 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         book.ReleaseDate
     );
 }
+public async Task<bool>  DeleteAsync(
+        int id,
+        CancellationToken cancellationToken
+    )
+    {
+        var book = await _dbContext.Books
+        .SingleOrDefaultAsync(
+            book => book.Id == id,
+            cancellationToken
+        );
+
+        if (book is null)
+        {
+            return false;
+        }
+        _dbContext.Books.Remove(book);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return true;
+    
+
+    }
+    
 }
