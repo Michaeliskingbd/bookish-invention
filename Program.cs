@@ -29,3 +29,9 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
+
+
+// dotnet new webapi -n LibraryApi
+// cd LibraryApi
+// dotnet run

@@ -13,10 +13,12 @@ public sealed class BookService: IBookService
 
 {
     private readonly AppDbContext _dbContext;
+    private readonly ILogger<BookService> _logger;
 
-    public BookService(AppDbContext dbContext)
+    public BookService(AppDbContext dbContext, ILogger<BookService> logger)
     {
             _dbContext = dbContext;
+            _logger = logger;
     }
 
     public async Task<IReadOnlyList<BookResponseDto>> GetAllAsync(
@@ -59,6 +61,12 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
 
        _dbContext.Books.Add(book);
        await _dbContext.SaveChangesAsync(cancellationToken);
+
+       _logger.LogInformation(
+         new EventId(1001, "BookCreated"),
+        "Book created successfully. BookId: {BookId}",
+        book.Id
+);
 
        return new BookResponseDto(
         book.Id,
