@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     : DbContext(options)
 {
     public DbSet<Book> Books => Set<Book>();
+    public DbSet<Author> Authors => Set<Author>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +31,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
             entity.Property(book => book.ReleaseDate)
                 .IsRequired();
+        });
+
+        modelBuilder.Entity<Author>(entity =>
+        {
+            entity.HasKey(author => author.Id);
+
+            entity.Property(author => author.Name)
+            .HasMaxLength(150)
+            .IsRequired();
         });
     }
 }
