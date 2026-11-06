@@ -15,6 +15,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IBookService, BookService>();
 
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+
+
 var app = builder.Build();
 
 app.UseExceptionHandler();

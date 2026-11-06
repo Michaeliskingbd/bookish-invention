@@ -2,11 +2,12 @@ using System;
 using LibraryApi.Data;
 using LibraryApi.DTOs.Authors;
 using LibraryApi.Models;
+using LibraryApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace LibraryApi.Services;
 
-public sealed class AuthorService
+public sealed class AuthorService : IAuthorService
 {
 
     private readonly AppDbContext _dbContext;
@@ -29,7 +30,6 @@ public sealed class AuthorService
     _dbContext.Authors.Add(author);
 
     await _dbContext.SaveChangesAsync(cancellationToken);
-
     _logger.LogInformation(
         "Author created successfully. AuthorId: {AuthorId}",
         author.Id
