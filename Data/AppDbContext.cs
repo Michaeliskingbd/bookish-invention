@@ -31,6 +31,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
 
             entity.Property(book => book.ReleaseDate)
                 .IsRequired();
+
+            entity.HasOne(book => book.Author)
+                .WithMany(author => author.Books)
+                .HasForeignKey(book => book.AuthorId);
         });
 
         modelBuilder.Entity<Author>(entity =>

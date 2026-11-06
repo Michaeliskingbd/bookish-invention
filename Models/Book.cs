@@ -12,9 +12,9 @@ public decimal Price {get; set;}
 
 public DateOnly ReleaseDate {get; set;}
 
-public int AuthorId { get; set; }
+public int? AuthorId { get; set; }
 
-public Author Author { get; set; } = null!;
+public Author? Author { get; set; } = null!;
 
 }
 
