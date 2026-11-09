@@ -32,7 +32,8 @@ public sealed class BookService: IBookService
                 book.Title,
                 book.Genre,
                 book.Price,
-                book.ReleaseDate)).ToListAsync(cancellationToken);
+                book.ReleaseDate,
+                book.AuthorId)).ToListAsync(cancellationToken);
                 
             
     }
@@ -45,7 +46,9 @@ public async Task<BookResponseDto?> GetByIdAsync(int id, CancellationToken cance
                 book.Title,
                 book.Genre,
                 book.Price,
-                book.ReleaseDate)).SingleOrDefaultAsync(cancellationToken);
+                book.ReleaseDate,
+                book.AuthorId)).SingleOrDefaultAsync(cancellationToken);
+                
   
 }
 
@@ -73,7 +76,8 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         book.Title,
         book.Genre,
         book.Price,
-        book.ReleaseDate
+        book.ReleaseDate,
+        book.AuthorId
 
        );
         
@@ -95,6 +99,22 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         return null;
     }
 
+    if (request.AuthorId.HasValue)
+{
+    var authorExists = await _dbContext.Authors
+        .AnyAsync(
+            author => author.Id == request.AuthorId.Value,
+            cancellationToken
+        );
+
+    if (!authorExists)
+    {
+        throw new ArgumentException(
+            $"Author with ID {request.AuthorId.Value} does not exist."
+        );
+    }
+}
+
     book.Title = request.Title;
     book.Genre = request.Genre;
     book.Price = request.Price;
@@ -108,7 +128,8 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         book.Title,
         book.Genre,
         book.Price,
-        book.ReleaseDate
+        book.ReleaseDate,
+        book.AuthorId
     );
 }
 public async Task<bool>  DeleteAsync(
