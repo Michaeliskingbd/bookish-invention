@@ -16,5 +16,7 @@ public sealed record UpdateBookDTO(
     [Range(0.01, 999999999)]
     decimal Price,
     
-    DateOnly ReleaseDate
+    DateOnly ReleaseDate,
+
+    int? AuthorId
 );
