@@ -6,5 +6,6 @@ public sealed record BookResponseDto(
     string Title,
     string Genre,
     decimal Price,
-    DateOnly ReleaseDate
+    DateOnly ReleaseDate,
+    int? AuthorId
 );

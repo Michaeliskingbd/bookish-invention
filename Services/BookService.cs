@@ -4,7 +4,7 @@ using LibraryApi.DTOs.Books;
 using LibraryApi.Models;
 using LibraryApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualBasic;
+
 
 
 namespace LibraryApi.Services;
@@ -99,6 +99,7 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
     book.Genre = request.Genre;
     book.Price = request.Price;
     book.ReleaseDate = request.ReleaseDate;
+    book.AuthorId = request.AuthorId;
 
     await _dbContext.SaveChangesAsync(cancellationToken);
 
