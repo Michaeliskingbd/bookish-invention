@@ -1,5 +1,6 @@
 
 using LibraryApi.DTOs.Books;
+using LibraryApi.Services.Results;
 
 namespace LibraryApi.Services.Interfaces;
 
@@ -19,7 +20,7 @@ public interface IBookService
         CancellationToken cancellationToken
     );
 
-    Task<BookResponseDto?>  UpdateAsync(
+    Task<UpdateBookResult>  UpdateAsync(
         int id,
         UpdateBookDTO request,
         CancellationToken cancellationToken

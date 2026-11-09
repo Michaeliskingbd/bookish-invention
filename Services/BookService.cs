@@ -3,6 +3,7 @@ using LibraryApi.Data;
 using LibraryApi.DTOs.Books;
 using LibraryApi.Models;
 using LibraryApi.Services.Interfaces;
+using LibraryApi.Services.Results;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -83,7 +84,7 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
         
     }
 
-   public async Task<BookResponseDto?> UpdateAsync(
+ public async Task<UpdateBookResult> UpdateAsync(
     int id,
     UpdateBookDTO request,
     CancellationToken cancellationToken)
@@ -96,24 +97,28 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
 
     if (book is null)
     {
-        return null;
+        return new UpdateBookResult(
+            UpdateBookStatus.BookNotFound,
+            null
+        );
     }
 
     if (request.AuthorId.HasValue)
-{
-    var authorExists = await _dbContext.Authors
-        .AnyAsync(
-            author => author.Id == request.AuthorId.Value,
-            cancellationToken
-        );
-
-    if (!authorExists)
     {
-        throw new ArgumentException(
-            $"Author with ID {request.AuthorId.Value} does not exist."
-        );
+        var authorExists = await _dbContext.Authors
+            .AnyAsync(
+                author => author.Id == request.AuthorId.Value,
+                cancellationToken
+            );
+
+        if (!authorExists)
+        {
+            return new UpdateBookResult(
+                UpdateBookStatus.AuthorNotFound,
+                null
+            );
+        }
     }
-}
 
     book.Title = request.Title;
     book.Genre = request.Genre;
@@ -123,13 +128,18 @@ public async Task<BookResponseDto> CreateAsync(CreateBookDTO request, Cancellati
 
     await _dbContext.SaveChangesAsync(cancellationToken);
 
-    return new BookResponseDto(
+    var response = new BookResponseDto(
         book.Id,
         book.Title,
         book.Genre,
         book.Price,
         book.ReleaseDate,
         book.AuthorId
+    );
+
+    return new UpdateBookResult(
+        UpdateBookStatus.Updated,
+        response
     );
 }
 public async Task<bool>  DeleteAsync(

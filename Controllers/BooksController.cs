@@ -1,6 +1,8 @@
 
 using LibraryApi.DTOs.Books;
+using LibraryApi.Services;
 using LibraryApi.Services.Interfaces;
+using LibraryApi.Services.Results;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryApi.Controllers;
@@ -11,6 +13,7 @@ namespace LibraryApi.Controllers;
 public sealed class BooksController : ControllerBase
 {
     private readonly IBookService _bookService;
+
 
     public BooksController(IBookService bookService)
     {
@@ -69,29 +72,36 @@ public async Task<ActionResult<BookResponseDto>> Create(
 }
 
 [HttpPut("{id:int}")]
-[ProducesResponseType(typeof(BookResponseDto), StatusCodes.Status201Created)]
+[ProducesResponseType(typeof(BookResponseDto), StatusCodes.Status200OK)]
 [ProducesResponseType(StatusCodes.Status404NotFound)]
 [ProducesResponseType(StatusCodes.Status400BadRequest)]
-
 public async Task<ActionResult<BookResponseDto>> Update(
     int id,
     UpdateBookDTO request,
     CancellationToken cancellationToken)
-    {
-         var book = await _bookService.UpdateAsync(
-            id,
-            request,
-            cancellationToken
-        );
+{
+    var result = await _bookService.UpdateAsync(
+        id,
+        request,
+        cancellationToken
+    );
 
-        if (book is null)
+    return result.Status switch
     {
-        return NotFound();
-    }
+        UpdateBookStatus.Updated => Ok(result.Book),
 
-    return Ok(book);
-    }
-    
+        UpdateBookStatus.BookNotFound => NotFound(),
+
+        UpdateBookStatus.AuthorNotFound => BadRequest(
+            new
+            {
+                message = $"Author with ID {request.AuthorId} does not exist."
+            }
+        ),
+
+        _ => StatusCode(StatusCodes.Status500InternalServerError)
+    };
+}
 
 [HttpDelete("{id:int}")]
 [ProducesResponseType(StatusCodes.Status204NoContent)]
