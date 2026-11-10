@@ -18,6 +18,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
     options.UseOpenIddict();
 });
+builder.Services.AddOpenIddict()
+    .AddCore(options =>
+    {
+        options.UseEntityFrameworkCore()
+            .UseDbContext<AppDbContext>();
+    });
 
 builder.Services.AddScoped<IBookService, BookService>();
 

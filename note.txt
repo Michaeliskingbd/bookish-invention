@@ -199,3 +199,38 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 What does UseOpenIddict() do?
 It adds OpenIddict's entity configurations to the EF Core model so EF Core knows how to map its applications, authorizations, scopes and tokens to PostgreSQL tables.
 This does not create the tables yet. We'll do that through migrations.
+
+
+Register Data Protection
+Open Program.cs.
+Immediately before your AddIdentityCore<ApplicationUser>() registration, add:
+builder.Services.AddDataProtection();
+
+Understand Data Protection
+ASP.NET Core Data Protection provides cryptographic services used by components such as Identity's token providers.
+
+For example, it supports secure tokens for:
+- Password resets.
+- Email confirmation.
+- Changing email addresses.
+It is separate from JWT authentication.
+Production consideration: Data Protection keys must be persisted securely and shared across application instances where necessary. Otherwise, restarting or redeploying an application could invalidate previously issued protection tokens.
+
+Configure OpenIddict Core.
+
+Identity manages users and passwords. OpenIddict Core manages OAuth/OIDC application registrations, authorizations, and tokens in PostgreSQL.
+
+In Program.cs, immediately after your AddDbContext<AppDbContext>() registration, add:
+builder.Services.AddOpenIddict()
+    .AddCore(options =>
+    {
+        options.UseEntityFrameworkCore()
+            .UseDbContext<AppDbContext>();
+    });
+
+What this does:
+- AddOpenIddict() registers OpenIddict services.
+- AddCore() enables OpenIddict's core functionality.
+- UseEntityFrameworkCore() tells OpenIddict to use EF Core for persistence.
+- UseDbContext<AppDbContext>() tells it to store its data in your existing PostgreSQL database context.
+Notice that this complements options.UseOpenIddict() inside AddDbContext. Both are necessary for the EF Core integration.
