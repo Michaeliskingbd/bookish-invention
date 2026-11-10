@@ -130,3 +130,42 @@ dotnet build
 
 
 Tell me whether both commands succeed. If you encounter an error, paste the full error message, but remove any passwords or other secrets..
+
+
+AUTHENTICATION
+Phase 1: ASP.NET Core Identity
+Our first objective is to introduce proper user management into LibraryApi.
+
+We'll do this in stages:
+1. Integrate Identity with PostgreSQL.
+2. Create user registration.
+3. Implement login and password verification.
+4. Configure OpenIddict to issue tokens.
+5. Protect API endpoints.
+6. Add roles and authorization.
+7. Implement refresh-token handling.
+We will not write our own password-hashing mechanism or invent a custom token protocol.
+Step 1: Install the Identity package
+ASP.NET Core Identity needs an EF Core integration package so it can store user accounts in PostgreSQL.
+
+In your project directory, run:
+dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 10.0.4
+
+
+We're matching the EF Core version already used by your project to avoid unnecessary dependency-version differences.
+
+This package provides the Identity database integration, including user and role stores. 
+Microsoft Learn+1
+
+
+After installation, run:
+dotnet list package
+This confirm that Microsoft.AspNetCore.Identity.EntityFrameworkCore appears in the package list.
+
+Register ASP.NET Core Identity........
+
+AddIdentityCore<ApplicationUser>()	Registers core user-management services.
+AddRoles<IdentityRole>()	Enables role management.
+AddEntityFrameworkStores<AppDbContext>()	Uses PostgreSQL through EF Core to store Identity data.
+AddSignInManager()	Registers services for signing users in.
+AddDefaultTokenProviders()	Enables Identity tokens for operations such as password resets and email confirmation.

@@ -65,6 +65,14 @@
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[10.0.3, )"
+            },
+            "OpenIddict.AspNetCore": {
+              "target": "Package",
+              "version": "[7.8.0, )"
+            },
+            "OpenIddict.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[7.8.0, )"
             }
           },
           "imports": [
