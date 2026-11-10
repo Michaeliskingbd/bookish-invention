@@ -163,9 +163,39 @@ dotnet list package
 This confirm that Microsoft.AspNetCore.Identity.EntityFrameworkCore appears in the package list.
 
 Register ASP.NET Core Identity........
-
 AddIdentityCore<ApplicationUser>()	Registers core user-management services.
 AddRoles<IdentityRole>()	Enables role management.
 AddEntityFrameworkStores<AppDbContext>()	Uses PostgreSQL through EF Core to store Identity data.
 AddSignInManager()	Registers services for signing users in.
 AddDefaultTokenProviders()	Enables Identity tokens for operations such as password resets and email confirmation.
+
+
+
+Install OpenIddict......
+Now we'll add OpenIddict, which handles the OAuth 2.0 / OpenID Connect protocols and token issuance.
+Install these two packages from your project directory:
+dotnet add package OpenIddict.AspNetCore --version 7.8.0
+dotnet add package OpenIddict.EntityFrameworkCore --version 7.8.0
+We're using 7.8.0, the stable release, rather than the newer 8.0 preview. 
+OpenIddict.AspNetCore 7.8.0+1
+Here's why we need both:
+Package	Responsibility
+OpenIddict.AspNetCore	Integrates OpenIddict with ASP.NET Core and handles server/token endpoints.
+OpenIddict.EntityFrameworkCore	Persists OpenIddict applications, authorizations, scopes and tokens through EF Core.
+
+
+Register OpenIddict's database entities........
+Open Program.cs and find your existing AddDbContext registration:
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
+Modify it to:
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseNpgsql(
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.UseOpenIddict();
+});
+What does UseOpenIddict() do?
+It adds OpenIddict's entity configurations to the EF Core model so EF Core knows how to map its applications, authorizations, scopes and tokens to PostgreSQL tables.
+This does not create the tables yet. We'll do that through migrations.

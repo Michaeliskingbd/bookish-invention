@@ -12,12 +12,18 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseNpgsql(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection"));
+
+    options.UseOpenIddict();
+});
 
 builder.Services.AddScoped<IBookService, BookService>();
 
 builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+builder.Services.AddDataProtection();
 
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
