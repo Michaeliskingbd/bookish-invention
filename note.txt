@@ -350,3 +350,24 @@ OpenIddict+1
 
 
 For now, this does not automatically protect every endpoint. We'll apply [Authorize] to selected endpoints later.
+
+
+
+
+Good. Your authentication infrastructure is now registered.
+
+Next: Create the database tables for Identity and OpenIddict.
+
+Your existing PostgreSQL database already contains your Books and Authors tables. Identity and OpenIddict need additional tables to store users, roles, tokens, authorizations and related information.
+Step 1: Create a migration
+From your LibraryApi project directory, run:
+dotnet ef migrations add AddIdentityAndOpenIddict
+
+
+EF Core will compare your updated AppDbContext model against the previous migration and generate the necessary schema changes.
+Step 2: Inspect the migration
+Before applying it, open the newly generated migration file in your Migrations folder.
+
+You should see table creation operations for Identity and OpenIddict, alongside any necessary model changes.
+
+Don't run database update yet. Let's inspect what EF Core generated before applying changes to PostgreSQL.
