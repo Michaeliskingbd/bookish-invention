@@ -53,7 +53,14 @@ builder.Services.AddOpenIddict()
         // Integrate OpenIddict with ASP.NET Core.
         options.UseAspNetCore()
             .EnableAuthorizationEndpointPassthrough();
-    });
+    }).AddValidation(options =>
+{
+    // Reuse the local authorization server configuration.
+    options.UseLocalServer();
+
+    // Integrate token validation with ASP.NET Core.
+    options.UseAspNetCore();
+});
 
 builder.Services.AddScoped<IBookService, BookService>();
 
