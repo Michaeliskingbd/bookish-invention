@@ -312,3 +312,41 @@ ASP.NET Core authorization	What is this authenticated user allowed to do?
 One important distinction: OpenIddict does not automatically log users in or create their accounts. Identity manages accounts, and we'll build the login and authorization flow that connects Identity to OpenIddict.
 
 That's the architecture we're building in LibraryApi.
+
+
+Next, we need to connect OpenIddict to ASP.NET Core's HTTP request pipeline.
+
+Registering OpenIddict services is not enough. ASP.NET Core must run its authentication and authorization middleware when requests arrive.
+Step 1: Register authorization services
+In Program.cs, add this after builder.Services.AddControllers();:
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+
+- AddAuthentication() registers the authentication infrastructure.
+- AddAuthorization() registers the authorization infrastructure.
+Step 2: Add the middleware
+Find this section:
+app.UseHttpsRedirection();
+
+app.MapControllers();
+
+
+Change it to:
+app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+
+Understand the order:
+1. UseAuthentication() examines the incoming request and attempts to establish the user's identity.
+2. UseAuthorization() checks whether that identity has permission to access the requested resource.
+3. MapControllers() makes your controller endpoints available.
+This ordering is important for OpenIddict's ASP.NET Core integration. 
+OpenIddict+1
+
+
+For now, this does not automatically protect every endpoint. We'll apply [Authorize] to selected endpoints later.
