@@ -23,6 +23,36 @@ builder.Services.AddOpenIddict()
     {
         options.UseEntityFrameworkCore()
             .UseDbContext<AppDbContext>();
+    })
+    .AddServer(options =>
+    {
+        // Define the authorization and token endpoints.
+        options.SetAuthorizationEndpointUris("/connect/authorize");
+        options.SetTokenEndpointUris("/connect/token");
+
+        // Enable Authorization Code Flow with mandatory PKCE.
+        options.AllowAuthorizationCodeFlow();
+        options.RequireProofKeyForCodeExchange();
+
+        // Enable refresh tokens.
+        options.AllowRefreshTokenFlow();
+
+        // Register the scopes clients may request.
+        options.RegisterScopes(
+            "openid",
+            "profile",
+            "email",
+            "roles",
+            "offline_access"
+        );
+
+        // Development certificates only.
+        options.AddDevelopmentEncryptionCertificate()
+            .AddDevelopmentSigningCertificate();
+
+        // Integrate OpenIddict with ASP.NET Core.
+        options.UseAspNetCore()
+            .EnableAuthorizationEndpointPassthrough();
     });
 
 builder.Services.AddScoped<IBookService, BookService>();
