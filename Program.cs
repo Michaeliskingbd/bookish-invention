@@ -8,9 +8,17 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddProblemDetails();
+
 builder.Services.AddControllers();
-builder.Services.AddAuthentication();
+
+builder.Services
+    .AddAuthentication(IdentityConstants.ApplicationScheme)
+    .AddIdentityCookies();
+
 builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -20,6 +28,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
     options.UseOpenIddict();
 });
+
 builder.Services.AddOpenIddict()
     .AddCore(options =>
     {
