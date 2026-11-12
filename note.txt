@@ -452,3 +452,56 @@ ASP.NET Core's dependency injection container supplies the UserManager instance.
 3. Why private readonly?
 
 The dependency is assigned once through the constructor and cannot be reassigned afterward.
+
+Step 5 — Implement the registration method
+Open AuthService.cs and add this method inside the AuthService class:
+
+public async Task<IdentityResult> RegisterAsync(
+    RegisterRequestDto request,
+    CancellationToken cancellationToken)
+{
+    cancellationToken.ThrowIfCancellationRequested();
+
+    var user = new ApplicationUser
+    {
+        UserName = request.Email,
+        Email = request.Email
+    };
+
+    return await _userManager.CreateAsync(user, request.Password);
+}
+
+
+
+Let's understand the important parts
+1. Creating the user
+var user = new ApplicationUser
+{
+    UserName = request.Email,
+    Email = request.Email
+};
+
+
+We use the email as the username for now.
+
+Notice that we don't assign the password to the ApplicationUser object.
+
+2. Creating the account
+return await _userManager.CreateAsync(user, request.Password);
+
+
+This is where Identity takes over.
+
+Internally, Identity:
+- Validates the password against your configured password policy.
+- Checks username and email uniqueness according to its validators.
+- Hashes the password using its password hasher.
+- Persists the user through the configured Identity store.
+- Returns an IdentityResult.
+The password is never stored as plain text.
+
+3. Cancellation token
+
+ThrowIfCancellationRequested() checks whether the request has already been cancelled.
+
+CreateAsync() itself does not accept a cancellation token, so cancellation cannot interrupt that operation once it starts.
