@@ -1,3 +1,4 @@
+using LibraryApi.DTOs.Auth;
 using LibraryApi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,4 +15,30 @@ public sealed class AuthController : ControllerBase
     {
         _authService = authService;
     }
+
+
+
+[HttpPost("register")]
+public async Task<IActionResult> Register(
+    RegisterRequestDto request,
+    CancellationToken cancellationToken)
+{
+    var result = await _authService.RegisterAsync(
+        request,
+        cancellationToken);
+
+    if (!result.Succeeded)
+    {
+        return BadRequest(new
+        {
+            errors = result.Errors.Select(error => error.Description)
+        });
+    }
+
+    return StatusCode(StatusCodes.Status201Created, new
+    {
+        message = "Registration successful."
+    });
+}
+
 }
