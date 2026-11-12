@@ -505,3 +505,226 @@ The password is never stored as plain text.
 ThrowIfCancellationRequested() checks whether the request has already been cancelled.
 
 CreateAsync() itself does not accept a cancellation token, so cancellation cannot interrupt that operation once it starts.
+
+Step 6 — Build the project
+Before connecting the service to the controller, let's make sure the code compiles.
+
+Run:
+dotnet build
+
+
+We want to catch any issues with the updated DTO, interface, and service implementation before proceeding.
+
+Tell me whether the build succeeds or share any errors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+done, successful
+
+
+
+
+
+
+
+
+
+
+
+
+
+The build succeeds. Your registration DTO, interface, and service implementation are compiling correctly.
+Step 7 — Register AuthService with dependency injection
+Open Program.cs.
+
+Find the section where you register your other services:
+builder.Services.AddScoped<IBookService, BookService>();
+builder.Services.AddScoped<IAuthorService, AuthorService>();
+
+
+Add:
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+
+Why AddScoped?
+A scoped service is created once per HTTP request and reused within that request.
+
+This is appropriate for AuthService because it depends on UserManager<ApplicationUser>, which uses scoped Identity infrastructure and the EF Core database context.
+
+Your registration section should now contain all three services.
+
+Your task: Make this change and tell me when you're done.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+Next, we'll create the registration endpoint in AuthController.
+Step 8 — Create the controller
+Inside your Controllers folder, create:
+
+AuthController.cs
+
+Add:
+using LibraryApi.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+
+namespace LibraryApi.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+[Produces("application/json")]
+public sealed class AuthController : ControllerBase
+{
+    private readonly IAuthService _authService;
+
+    public AuthController(IAuthService authService)
+    {
+        _authService = authService;
+    }
+}
+
+
+What this does
+- [Route("api/[controller]")] establishes the route prefix api/auth.
+- [ApiController] enables automatic request validation and API-specific behavior.
+- ControllerBase provides HTTP response methods such as Ok(), BadRequest(), and CreatedAtAction().
+- IAuthService is injected through constructor dependency injection.
+We're keeping the controller thin. It will handle HTTP concerns, while AuthService handles registration logic.
+
+Your task: Create the controller and build the project. Tell me when it succeeds.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+succeeded
+
+
+
+
+
+
+
+
+
+
+
+
+
+Now we'll implement the actual HTTP registration endpoint.
+Step 9 — Add the registration action
+Open AuthController.cs.
+
+Add these using directives:
+using LibraryApi.DTOs.Auth;
+using Microsoft.AspNetCore.Http;
+
+
+Inside AuthController, add:
+
+[HttpPost("register")]
+public async Task<IActionResult> Register(
+    RegisterRequestDto request,
+    CancellationToken cancellationToken)
+{
+    var result = await _authService.RegisterAsync(
+        request,
+        cancellationToken);
+
+    if (!result.Succeeded)
+    {
+        return BadRequest(new
+        {
+            errors = result.Errors.Select(error => error.Description)
+        });
+    }
+
+    return StatusCode(StatusCodes.Status201Created, new
+    {
+        message = "Registration successful."
+    });
+}
+
+
+
+Understand the implementation
+1. HTTP route
+[HttpPost("register")]
+
+
+Combined with the controller's route prefix, our endpoint becomes:
+
+POST /api/auth/register
+
+2. CancellationToken
+
+ASP.NET Core automatically supplies the request's cancellation token. We pass it to our service.
+
+3. Identity result
+if (!result.Succeeded)
+
+
+Identity may reject registration because of:
+- Password policy violations.
+- Duplicate usernames.
+- Duplicate emails.
+We return the errors instead of pretending registration succeeded.
+
+4. HTTP 201 Created
+
+When registration succeeds, we return 201 Created, indicating that a new user resource was created.
+
+We deliberately return a simple response rather than exposing the entire ApplicationUser object.
