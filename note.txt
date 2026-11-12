@@ -370,4 +370,4 @@ Before applying it, open the newly generated migration file in your Migrations f
 
 You should see table creation operations for Identity and OpenIddict, alongside any necessary model changes.
 
-Don't run database update yet. Let's inspect what EF Core generated before applying changes to PostgreSQL.
+Don't run database update yet. Let's inspect what EF Core generated before applying changes to PostgreSQL..
