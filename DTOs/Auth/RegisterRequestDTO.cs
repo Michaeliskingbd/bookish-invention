@@ -10,6 +10,9 @@ public sealed class RegisterRequestDto
     [MaxLength(256)]
     public string Email { get; set; } = string.Empty;
 
+    [Phone]
+    public string? PhoneNumber { get; set; }
+
     [Required]
     [MinLength(12)]
     public string Password { get; set; } = string.Empty;

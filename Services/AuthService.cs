@@ -25,7 +25,8 @@ public async Task<IdentityResult> RegisterAsync(
     var user = new ApplicationUser
     {
         UserName = request.Email,
-        Email = request.Email
+        Email = request.Email,
+        PhoneNumber = request.PhoneNumber
     };
 
     return await _userManager.CreateAsync(user, request.Password);
