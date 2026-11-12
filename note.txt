@@ -366,8 +366,89 @@ dotnet ef migrations add AddIdentityAndOpenIddict
 
 EF Core will compare your updated AppDbContext model against the previous migration and generate the necessary schema changes.
 Step 2: Inspect the migration
-Before applying it, open the newly generated migration file in your Migrations folder.
+Before applying it, open the newly generated migration file in your Migrations folder..
 
 You should see table creation operations for Identity and OpenIddict, alongside any necessary model changes.
 
 Don't run database update yet. Let's inspect what EF Core generated before applying changes to PostgreSQL..
+
+
+write codes for authentication
+Step 1 — Create the registration DTO
+Step 2 — Understand automatic DTO validation
+Step 3 — Create the registration service
+We'll keep registration logic out of the controller, following the service-based architecture you've used for Books and Authors.
+
+Create:
+
+Services/Interfaces/IAuthService.cs
+
+Add:
+using LibraryApi.DTOs.Auth;
+
+namespace LibraryApi.Services.Interfaces;
+
+public interface IAuthService
+{
+    Task<IdentityResult> RegisterAsync(RegisterRequestDto request);
+}
+
+
+For now, we're creating the interface only. We'll define its registration contract next.
+
+Why an interface?
+
+It separates what the authentication service can do from how it implements those operations. It also makes dependency injection and unit testing easier.
+
+Create the file and tell me when you're done.
+
+Step 4 — Implement the authentication service
+We'll now implement the registration logic using ASP.NET Core Identity's UserManager<ApplicationUser>.
+
+Create:
+
+Services/AuthService.cs
+
+Add the following:
+
+using LibraryApi.DTOs.Auth;
+using LibraryApi.Models;
+using LibraryApi.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+
+namespace LibraryApi.Services;
+
+public sealed class AuthService : IAuthService
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+
+    public AuthService(UserManager<ApplicationUser> userManager)
+    {
+        _userManager = userManager;
+    }
+}
+
+
+
+Understand the implementation
+1. UserManager<ApplicationUser>
+
+This is an ASP.NET Core Identity service responsible for managing user accounts.
+
+It provides operations such as:
+- CreateAsync() — create a user.
+- FindByEmailAsync() — find a user by email.
+- CheckPasswordAsync() — verify a password.
+- AddToRoleAsync() — assign a role.
+- GetRolesAsync() — retrieve a user's roles.
+We don't manually hash passwords. UserManager delegates that responsibility to Identity's configured password hasher.
+
+2. Constructor injection
+public AuthService(UserManager<ApplicationUser> userManager)
+
+
+ASP.NET Core's dependency injection container supplies the UserManager instance.
+
+3. Why private readonly?
+
+The dependency is assigned once through the constructor and cannot be reassigned afterward.
