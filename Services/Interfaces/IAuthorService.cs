@@ -7,6 +7,6 @@ public interface IAuthorService
 {
 Task<AuthorResponseDto>  CreateAsync(
         CreateAuthorDto request,
-        CancellationToken cancellationTokenb 
+        CancellationToken cancellationToken
     );
 }; 
