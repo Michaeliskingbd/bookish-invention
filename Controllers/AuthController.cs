@@ -41,4 +41,27 @@ public async Task<IActionResult> Register(
     });
 }
 
+[HttpPost("login")]
+public async Task<IActionResult> Login(
+    LoginRequestDto request,
+    CancellationToken cancellationToken)
+{
+    var succeeded = await _authService.LoginAsync(
+        request,
+        cancellationToken);
+
+    if (!succeeded)
+    {
+        return Unauthorized(new
+        {
+            message = "Invalid email or password."
+        });
+    }
+
+    return Ok(new
+    {
+        message = "Login successful."
+    });
+}
+
 }
