@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
 
 builder.Services.AddControllers();
-builder.Services.AddRazorPages();
+
 
 builder.Services
     .AddAuthentication(IdentityConstants.ApplicationScheme)
@@ -114,7 +114,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapRazorPages();
+
 
 app.Run();
 
