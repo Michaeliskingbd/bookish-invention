@@ -9,10 +9,12 @@ namespace LibraryApi.Services;
 public sealed class AuthService : IAuthService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
-    public AuthService(UserManager<ApplicationUser> userManager)
+    public AuthService(UserManager<ApplicationUser> userManager ,     SignInManager<ApplicationUser> signInManager)
     {
         _userManager = userManager;
+         _signInManager = signInManager;
     }
 
 
@@ -32,5 +34,28 @@ public async Task<IdentityResult> RegisterAsync(
     return await _userManager.CreateAsync(user, request.Password);
 }
 
+
+
+public async Task<bool> LoginAsync(
+    LoginRequestDto request,
+    CancellationToken cancellationToken)
+{
+    cancellationToken.ThrowIfCancellationRequested();
+
+    var user = await _userManager.FindByEmailAsync(request.Email);
+
+    if (user is null)
+    {
+        return false;
+    }
+
+    var result = await _signInManager.PasswordSignInAsync(
+        user,
+        request.Password,
+        isPersistent: false,
+        lockoutOnFailure: true);
+
+    return result.Succeeded;
+}
 }
 

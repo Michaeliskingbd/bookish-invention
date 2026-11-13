@@ -799,3 +799,66 @@ This gives us:
 One question: Are you comfortable introducing Razor Pages for the authentication UI, while keeping your existing Books, Authors, and Auth APIs as controllers?
 
 
+Create the login request DTO
+We'll keep the login implementation separate from registration.
+
+Create this file:
+
+DTOs/Auth/LoginRequestDto.cs
+
+Add:
+using System.ComponentModel.DataAnnotations;
+
+namespace LibraryApi.DTOs.Auth;
+
+public sealed class LoginRequestDto
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Required]
+    public string Password { get; set; } = string.Empty;
+}
+
+
+Why these properties?
+- Email: Identifies the account the user wants to access.
+- Password: Supplies the credential that Identity will verify.
+- [Required]: Rejects missing values.
+- [EmailAddress]: Rejects malformed email addresses.
+Notice that we are not including ConfirmPassword. That field is necessary during registration, not login.
+
+Also, we will never return the password or password hash in an API response.
+
+Create the DTO and tell me done.
+
+
+Add the login method to IAuthService
+Open:
+
+Services/Interfaces/IAuthService.cs
+
+Add this method to the existing interface:
+Task<bool> LoginAsync(
+    LoginRequestDto request,
+    CancellationToken cancellationToken);
+
+
+Your interface should now expose both operations:
+- RegisterAsync() — creates a user account.
+- LoginAsync() — verifies credentials and establishes an authenticated session.
+Why Task<bool> for now?
+- true: Authentication succeeded.
+- false: Authentication failed.
+We'll use SignInManager internally to establish the Identity authentication cookie.
+
+The cookie is important because OpenIddict needs an authenticated user session when handling the authorization request.
+
+Add the method without removing RegisterAsync().
+
+Add the login method to IAuthService
+Open:
+
+Services/Interfaces/IAuthService.cs
+

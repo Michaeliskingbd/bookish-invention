@@ -10,6 +10,10 @@ Task<IdentityResult> RegisterAsync(
           RegisterRequestDto request,
           CancellationToken cancellationToken
 );
+
+Task<bool> LoginAsync(
+    LoginRequestDto request,
+    CancellationToken cancellationToken);
     
 
     
