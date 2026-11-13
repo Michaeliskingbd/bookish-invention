@@ -787,3 +787,59 @@ Two concepts you need to understand
 Access token: A credential presented to your API to prove the client's authorization.
 
 Refresh token: A credential used to obtain a new access token without requiring the user to authenticate again, subject to the server's policies.
+
+
+Prepare the login page
+We'll use ASP.NET Core MVC/Razor for the login interface rather than accepting passwords directly at /connect/authorize.
+
+This gives us:
+- A browser-based login page.
+- An Identity authentication cookie after successful login.
+- A reusable login experience for authorization requests from web and mobile clients.
+One question: Are you comfortable introducing Razor Pages for the authentication UI, while keeping your existing Books, Authors, and Auth APIs as controllers?
+
+
+
+For this project, Razor Pages is a good choice.
+
+It allows us to build a server-rendered login interface inside the existing ASP.NET Core application without introducing another frontend framework.
+
+It also works with our intended architecture:
+- Web clients redirect users to the authorization server.
+- Mobile clients open the system browser for authentication.
+- Both use the same hosted login interface.
+- Identity manages the login session using its authentication cookie.
+- OpenIddict handles authorization and token issuance.
+Razor Pages is not mandatory in production. A separate React, Angular, or other frontend could provide the login interface. But Razor Pages keeps our learning project simpler without compromising the authentication architecture.
+Step 14 — Enable Razor Pages
+Open Program.cs.
+
+1. Register Razor Pages
+
+Find:
+builder.Services.AddControllers();
+
+
+Add immediately after it:
+builder.Services.AddRazorPages();
+
+
+2. Map Razor Pages
+
+Find:
+app.MapControllers();
+
+
+Add immediately after it:
+app.MapRazorPages();
+
+
+Your endpoint mapping should now look like:
+app.MapControllers();
+app.MapRazorPages();
+
+
+Why both?
+- AddRazorPages() registers the services required to support Razor Pages.
+- MapRazorPages() makes the Razor Page endpoints accessible through HTTP.
+We are adding a UI layer, not replacing your existing API controllers.
