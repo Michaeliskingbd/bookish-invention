@@ -843,3 +843,99 @@ Why both?
 - AddRazorPages() registers the services required to support Razor Pages.
 - MapRazorPages() makes the Razor Page endpoints accessible through HTTP.
 We are adding a UI layer, not replacing your existing API controllers.
+
+
+Create the login page
+We'll create the Razor Page that users will see when they need to authenticate.
+
+Inside your project, create this folder structure:
+Pages/
+└── Account/
+    └── Login.cshtml
+
+
+For now, create only the Pages/Account folder and the Login.cshtml file.
+What are these files?
+- Pages: The root folder for Razor Pages.
+- Account: Groups authentication-related pages.
+- Login.cshtml: Contains the HTML markup and Razor syntax for the login interface.
+A Razor Page can also have a companion .cshtml.cs file containing its C# page model. We'll introduce that next.
+
+Create the PageModel
+Inside Pages/Account, create:
+
+Login.cshtml.cs
+
+Add:
+
+using Microsoft.AspNetCore.Mvc.RazorPages;
+
+namespace LibraryApi.Pages.Account;
+
+public sealed class LoginModel : PageModel
+{
+    public void OnGet()
+    {
+    }
+}
+
+
+
+Understand the structure
+- PageModel is the C# class associated with a Razor Page.
+- LoginModel contains the page's request-handling logic.
+- OnGet() handles HTTP GET requests.
+- OnPost() will eventually handle login form submissions.
+The naming convention matters:
+
+Login.cshtml and Login.cshtml.cs are paired automatically by Razor Pages.
+
+For example, requesting /Account/Login invokes OnGet().
+
+
+Build the login form
+Open Pages/Account/Login.cshtml and add:
+
+@page
+@model LibraryApi.Pages.Account.LoginModel
+
+<h1>Sign in</h1>
+
+<form method="post">
+    <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" name="Email" required />
+    </div>
+
+    <div>
+        <label for="password">Password</label>
+        <input id="password" type="password" name="Password" required />
+    </div>
+
+    <button type="submit">Sign in</button>
+</form>
+
+
+
+Understand the important parts
+1. @page
+
+Makes this file an independently routable Razor Page.
+
+Its URL will be:
+/Account/Login
+
+
+2. @model
+
+Connects the HTML page to the C# LoginModel class.
+
+3. method="post"
+
+Submitting the form sends an HTTP POST request to the same page.
+
+4. Input names
+
+name="Email" and name="Password" will eventually bind to properties on LoginModel.
+
+Security note: We will add antiforgery protection, validation, and secure credential handling as we implement the POST handler. Razor Pages supports antiforgery protection automatically for form posts.
