@@ -728,3 +728,18 @@ We return the errors instead of pretending registration succeeded.
 When registration succeeds, we return 201 Created, indicating that a new user resource was created.
 
 We deliberately return a simple response rather than exposing the entire ApplicationUser object.
+
+
+
+
+Login authentication
+We'll now implement login.
+
+There is an important architectural distinction in your project:
+- ASP.NET Core Identity verifies user credentials and manages user accounts.
+- OpenIddict issues access tokens and refresh tokens.
+We should use OpenIddict for token issuance rather than manually generating JWTs.
+
+Our login implementation will eventually allow a user to authenticate and obtain tokens that can be used by both web and mobile clients.
+
+Before implementing it, we'll examine how the OAuth 2.0 Authorization Code Flow with PKCE works, since that's the flow we've configured in OpenIddict.
