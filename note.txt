@@ -743,3 +743,47 @@ We should use OpenIddict for token issuance rather than manually generating JWTs
 Our login implementation will eventually allow a user to authenticate and obtain tokens that can be used by both web and mobile clients.
 
 Before implementing it, we'll examine how the OAuth 2.0 Authorization Code Flow with PKCE works, since that's the flow we've configured in OpenIddict.
+
+Understand the login and token flow
+Your application has three important components:
+Component	Responsibility
+ASP.NET Core Identity	Stores users and verifies passwords
+OpenIddict	Handles OAuth 2.0 / OpenID Connect and issues tokens
+Library API	Protects resources using validated access tokens
+
+How authentication will work
+We're using Authorization Code Flow with PKCE.
+Authentication sequence
+1. User opens the application
+   
+   A web or mobile client requests authorization.
+2. OpenIddict receives the authorization request
+   
+   It checks the client and authorization parameters.
+3. User authenticates
+   
+   If the user doesn't have an active login session, they are presented with a login interface. Identity verifies their credentials.
+4. Authorization is granted
+   
+   The user approves the requested access where consent is required.
+5. Authorization code is issued
+   
+   OpenIddict returns a short-lived authorization code to the client.
+6. Client exchanges the code
+   
+   The client sends the code and its PKCE verifier to OpenIddict's token endpoint.
+7. Tokens are issued
+   
+   OpenIddict returns the access token and, when requested and permitted, a refresh token.
+8. Client accesses protected APIs
+   
+   The client sends the access token in the HTTP Authorization header.
+
+Important: Why not simply create a /login endpoint that returns a JWT?
+Because we're building an authentication server that supports both browser and native mobile clients.
+
+Authorization Code Flow with PKCE provides a standardized approach without exposing user passwords to the client application.
+Two concepts you need to understand
+Access token: A credential presented to your API to prove the client's authorization.
+
+Refresh token: A credential used to obtain a new access token without requiring the user to authenticate again, subject to the server's policies.
