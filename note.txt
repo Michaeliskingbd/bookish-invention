@@ -862,3 +862,60 @@ Open:
 
 Services/Interfaces/IAuthService.cs
 
+mplement login in AuthService
+Open:
+
+Services/AuthService.cs
+
+We need SignInManager<ApplicationUser> in addition to the existing UserManager<ApplicationUser>.
+
+1. Add the field:
+private readonly SignInManager<ApplicationUser> _signInManager;
+
+
+2. Update the constructor:
+public AuthService(
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager)
+{
+    _userManager = userManager;
+    _signInManager = signInManager;
+}
+
+
+Keep your existing _userManager field.
+
+3. Add this method below RegisterAsync:
+public async Task<bool> LoginAsync(
+    LoginRequestDto request,
+    CancellationToken cancellationToken)
+{
+    cancellationToken.ThrowIfCancellationRequested();
+
+    var user = await _userManager.FindByEmailAsync(request.Email);
+
+    if (user is null)
+    {
+        return false;
+    }
+
+    var result = await _signInManager.PasswordSignInAsync(
+        user,
+        request.Password,
+        isPersistent: false,
+        lockoutOnFailure: true);
+
+    return result.Succeeded;
+}
+
+
+What is happening here?
+1. FindByEmailAsync() locates the account.
+2. If the account doesn't exist, authentication fails.
+3. PasswordSignInAsync() verifies the password against the stored password hash.
+4. isPersistent: false means the authentication cookie is not configured as a persistent, long-lived login.
+5. lockoutOnFailure: true enables Identity's configured account lockout behavior after repeated failed attempts.
+6. result.Succeeded tells us whether authentication succeeded.
+Important: PasswordSignInAsync() also creates the Identity authentication cookie. This cookie will be needed when the browser subsequently requests /connect/authorize.
+
+The login endpoint will eventually need appropriate CSRF protection because it establishes a cookie-based
