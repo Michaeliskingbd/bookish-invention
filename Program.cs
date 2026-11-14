@@ -38,7 +38,7 @@ builder.Services.AddOpenIddict()
     })
     .AddServer(options =>
     {
-        // Define the authorization and token endpoints.
+        // Define the authorization and token endpoints..
         options.SetAuthorizationEndpointUris("/connect/authorize");
         options.SetTokenEndpointUris("/connect/token");
 

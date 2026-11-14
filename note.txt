@@ -1167,3 +1167,26 @@ When the application starts, the seeder:
 2. Creates it if it doesn't.
 3. Does nothing if it already exists.
 This makes the operation safe to repeat.
+
+
+Verify Bruno's client registration
+Before implementing the next endpoint, let's verify that OpenIddict successfully registered Bruno in PostgreSQL.
+
+Start your application:
+dotnet run
+
+
+If startup succeeds, open your PostgreSQL database and execute:
+SELECT
+    "ClientId",
+    "DisplayName",
+    "ClientType"
+FROM "OpenIddictApplications";
+
+
+Note: PostgreSQL table and column names may differ if you customized your EF Core mappings.
+Expected result
+ClientId	DisplayName	ClientType
+bruno-client	Bruno Development Client	public
+
+If you see this record, our Bruno client has been registered successfully.
