@@ -1128,3 +1128,42 @@ Scope permissions	Restricts which scopes Bruno can request
 Important: This registers only Bruno. React and Flutter will receive separate client registrations later.
 
 For now, create the file exactly as shown. Don't modify Program.cs yet.
+
+
+
+Connect the seeder to application startup
+Now we need to make sure Bruno's client is automatically registered when the application starts.
+
+Open Program.cs.
+
+Find:
+var app = builder.Build();
+
+
+Immediately after your existing development configuration, add:
+if (app.Environment.IsDevelopment())
+{
+    await OpenIddictClientSeeder.SeedAsync(app.Services);
+}
+
+
+For example:
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+
+    await OpenIddictClientSeeder.SeedAsync(app.Services);
+}
+
+
+Your existing using LibraryApi.Data; should already provide access to the seeder.
+
+Why restrict this to Development?
+
+The Bruno client and its callback URL are for local testing. We don't want a development client automatically registered in production.
+
+When the application starts, the seeder:
+1. Checks whether bruno-client already exists.
+2. Creates it if it doesn't.
+3. Does nothing if it already exists.
+This makes the operation safe to repeat.
