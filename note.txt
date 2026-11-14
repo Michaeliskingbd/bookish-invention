@@ -1004,3 +1004,127 @@ Associates the requested scopes with the authenticated principal.
 This is particularly important. We hand the principal to OpenIddict rather than generating tokens ourselves. OpenIddict takes responsibility for producing the authorization response.
 Important limitation at this stage
 This is our initial authorization endpoint. We still need to implement client registration, scope/resource validation, claim destinations, and the login redirect experience before considering the flow production-ready.
+
+
+The authorization controller compiles. We can now move to OpenIddict client registration.
+
+An OAuth client represents an application permitted to authenticate through our authorization server. React and Flutter will eventually have separate client registrations.
+
+We should not register them with guessed redirect URIs. OpenIddict checks redirect URIs strictly, so each URI must match the one configured in its client application.
+
+Establish Bruno's redirect URI
+I checked Bruno's current OAuth 2.0 documentation. Bruno supports Authorization Code with PKCE and can intercept the authorization callback. 
+GitHub+1
+
+
+For development, let's use Bruno's hosted callback:
+https://oauth.usebruno.com/callback
+
+
+In Bruno:
+1. Open your collection settings.
+2. Go to Auth.
+3. Select OAuth 2.0.
+4. Select Authorization Code as the grant type.
+5. Enable Use PKCE.
+6. Set the Callback URL to https://oauth.usebruno.com/callback.
+7. Select Use System Browser for the callback.
+Reference: Bruno callback and system browser documentation.
+
+We will register this exact URI with OpenIddict.
+
+One important point: Bruno opens a browser for authentication, so we will also need a temporary login interface hosted by ASP.NET Core. We can use it for development and replace it with the React interface later.
+
+
+
+Register Bruno as an OpenIddict client
+We'll register Bruno as a public OAuth client using Authorization Code Flow with PKCE.
+
+Why public client? Bruno will use PKCE instead of relying on a client secret embedded in the application.
+
+Create:
+
+Data/OpenIddictClientSeeder.cs
+
+Add:
+using Microsoft.Extensions.DependencyInjection;
+using OpenIddict.Abstractions;
+
+namespace LibraryApi.Data;
+
+public static class OpenIddictClientSeeder
+{
+    public static async Task SeedAsync(IServiceProvider services)
+    {
+        await using var scope = services.CreateAsyncScope();
+
+        var manager = scope.ServiceProvider
+            .GetRequiredService<IOpenIddictApplicationManager>();
+
+        const string clientId = "bruno-client";
+
+        var existingClient = await manager.FindByClientIdAsync(clientId);
+
+        if (existingClient is not null)
+        {
+            return;
+        }
+
+        var descriptor = new OpenIddictApplicationDescriptor
+        {
+            ClientId = clientId,
+            DisplayName = "Bruno Development Client",
+            ClientType = OpenIddictConstants.ClientTypes.Public
+        };
+
+        descriptor.RedirectUris.Add(
+            new Uri("https://oauth.usebruno.com/callback"));
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Endpoints.Authorization);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Endpoints.Token);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.GrantTypes.RefreshToken);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.ResponseTypes.Code);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Scopes.Profile);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Scopes.Email);
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Scopes.OfflineAccess);//or OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access"
+
+        descriptor.Permissions.Add(
+            OpenIddictConstants.Permissions.Prefixes.Scope + "openid");
+
+        descriptor.Requirements.Add(
+            OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
+
+        await manager.CreateAsync(descriptor);
+    }
+}
+
+
+What we've configured
+Setting	Purpose
+bruno-client	Identifies Bruno
+Public	No client secret required
+Redirect URI	Where Bruno receives the authorization response
+Authorization Code	Permitted authentication flow
+Refresh Token	Allows token renewal
+PKCE requirement	Requires proof of possession during code exchange
+Scope permissions	Restricts which scopes Bruno can request
+
+Important: This registers only Bruno. React and Flutter will receive separate client registrations later.
+
+For now, create the file exactly as shown. Don't modify Program.cs yet.
