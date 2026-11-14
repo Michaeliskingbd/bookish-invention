@@ -106,6 +106,7 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await OpenIddictClientSeeder.SeedAsync(app.Services);
 }
 
 app.UseHttpsRedirection();
