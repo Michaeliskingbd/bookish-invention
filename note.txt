@@ -919,3 +919,88 @@ What is happening here?
 Important: PasswordSignInAsync() also creates the Identity authentication cookie. This cookie will be needed when the browser subsequently requests /connect/authorize.
 
 The login endpoint will eventually need appropriate CSRF protection because it establishes a cookie-based
+
+
+
+Create the authorization controller
+We'll now implement the endpoint that connects ASP.NET Core Identity to OpenIddict.
+
+Create a new file:
+
+Controllers/AuthorizationController.cs
+
+Start with this code:
+using LibraryApi.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
+
+namespace LibraryApi.Controllers;
+
+public sealed class AuthorizationController : Controller
+{
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+
+    public AuthorizationController(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager)
+    {
+        _userManager = userManager;
+        _signInManager = signInManager;
+    }
+
+    [HttpGet("~/connect/authorize")]
+    [HttpPost("~/connect/authorize")]
+    public async Task<IActionResult> Authorize()
+    {
+        var request = HttpContext.GetOpenIddictServerRequest()
+            ?? throw new InvalidOperationException(
+                "The OpenIddict authorization request cannot be retrieved.");
+
+        var user = await _userManager.GetUserAsync(User);
+
+        if (user is null)
+        {
+            return Challenge(
+                IdentityConstants.ApplicationScheme);
+        }
+
+        var principal = await _signInManager.CreateUserPrincipalAsync(user);
+
+        principal.SetScopes(request.GetScopes());
+
+        return SignIn(
+            principal,
+            OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+    }
+}
+
+
+Understand the important parts
+1. GetOpenIddictServerRequest()
+
+Retrieves the authorization request that OpenIddict has already validated and passed to our controller.
+
+2. GetUserAsync(User)
+
+Retrieves the currently authenticated Identity user from the authentication cookie.
+
+3. Challenge()
+
+If the user isn't authenticated, the application requests authentication through the Identity cookie scheme. We'll connect this to our React login interface later.
+
+4. CreateUserPrincipalAsync(user)
+
+Creates a claims principal containing the user's identity and claims.
+
+5. SetScopes()
+
+Associates the requested scopes with the authenticated principal.
+
+6. SignIn()
+
+This is particularly important. We hand the principal to OpenIddict rather than generating tokens ourselves. OpenIddict takes responsibility for producing the authorization response.
+Important limitation at this stage
+This is our initial authorization endpoint. We still need to implement client registration, scope/resource validation, claim destinations, and the login redirect experience before considering the flow production-ready.
