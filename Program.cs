@@ -70,7 +70,7 @@ builder.Services.AddOpenIddict()
     // Reuse the local authorization server configuration.
     options.UseLocalServer();
 
-    // Integrate token validation with ASP.NET Core.
+    // Integrate token validation with ASP.NET Core..
     options.UseAspNetCore();
 });
 
